@@ -9,6 +9,7 @@ public class ClientHandler implements Runnable {
     private int clientId;
     private BufferedReader in;
     private PrintWriter out;
+    private String username;
 
     public ClientHandler(Socket socket, UberServer server) throws IOException {
         this.socket = socket;
@@ -21,24 +22,135 @@ public class ClientHandler implements Runnable {
     @Override
     public void run() {
         try {
-            String clientType = in.readLine();
-            if ("customer".equalsIgnoreCase(clientType)) {
-                server.addCustomer(clientId, this);
-                handleCustomer();
-            } else if ("driver".equalsIgnoreCase(clientType)) {
-                server.addDriver(clientId, this);
-                handleDriver();
+            while (true) {
+                String action = in.readLine();
+                System.out.println("Received action: " + action);
+
+                if ("register".equalsIgnoreCase(action)) {
+                    handleRegistration();
+                } else if ("login".equalsIgnoreCase(action)) {
+                    handleLogin();
+                }
+                else if ("disconnect".equalsIgnoreCase(action)) {
+                    socket.close();
+                    break;
+                }
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    private void handleCustomer() {
+    private void handleRegistration() throws IOException {
+        String type = in.readLine();
+        String username = in.readLine();
+        String password = in.readLine();
 
+        System.out.println("Registration attempt: " + username + ", type: " + type);
+
+
+        if (server.registerUser(username, password, type)) {
+            out.println("Registration successful");
+            if("customer".equalsIgnoreCase(type)) {
+                server.addCustomer(clientId, this);
+                handleCustomer();
+            } else if("driver".equalsIgnoreCase(type)) {
+                server.addDriver(clientId, this);
+                handleDriver();
+            }
+        } else {
+            out.println("Username already exists");
+        }
+    }
+
+    private void handleLogin() throws IOException {
+        String username = in.readLine();
+        String password = in.readLine();
+
+        System.out.println("Login attempt: " + username);
+
+        if (server.authenticateUser(username, password)) {
+            this.username = username;
+            String userType = server.getUserType(username);
+            out.println("Login successful");
+            out.println(userType);
+
+            if ("customer".equalsIgnoreCase(userType)) {
+                System.out.println("Customer logged in: " + username);
+                handleCustomer();
+            } else if ("driver".equalsIgnoreCase(userType)) {
+                System.out.println("Driver logged in: " + username);
+                handleDriver();
+            } else if ("admin".equalsIgnoreCase(userType)) {
+                System.out.println("Admin logged in: " + username);
+                handleAdmin();
+            }
+        } else {
+            out.println("Invalid credentials");
+        }
+    }
+
+
+    private void handleCustomer() {
+        try {
+            while (true) {
+                String request = in.readLine();
+                if ("request ride".equalsIgnoreCase(request)) {
+                    server.requestRide(this);
+                } else if ("disconnect".equalsIgnoreCase(request)) {
+                    socket.close();
+                    break;
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private void handleDriver() {
+        try {
+            while (true) {
+                String request = in.readLine();
+                if (request.startsWith("offer ride")) {
+                    int fare = Integer.parseInt(request.split(" ")[2]);
+                    server.handleRideOffer(this, fare);
+                } else if ("start ride".equalsIgnoreCase(request)) {
+                    int customerId = Integer.parseInt(in.readLine());
+                    ClientHandler customer = server.getCustomerById(customerId);
+                    server.startRide(this, customer);
+                } else if ("complete ride".equalsIgnoreCase(request)) {
+                    server.completeRide(this);
+                } else if ("disconnect".equalsIgnoreCase(request)) {
+                    socket.close();
+                    break;
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
+    private void handleAdmin() {
+        try {
+            while (true) {
+                String request = in.readLine();
+                if ("get stats".equalsIgnoreCase(request)) {
+                    server.getAdminStats(this);
+                } else if ("disconnect".equalsIgnoreCase(request)) {
+                    socket.close();
+                    break;
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void sendMessage(String message) {
+        out.println(message);
+    }
+
+    public String getUsername() {
+        return username;
     }
 }
