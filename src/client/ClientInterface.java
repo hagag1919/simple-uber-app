@@ -54,6 +54,11 @@ public class ClientInterface {
         System.out.print("Enter password: ");
         String password = scanner.nextLine();
 
+        if(!"customer".equalsIgnoreCase(type) && !"driver".equalsIgnoreCase(type)) {
+            System.out.println("Invalid user type");
+            return;
+        }
+
         out.println(type);
         out.println(username);
         out.println(password);
@@ -98,21 +103,51 @@ public class ClientInterface {
         while (true) {
             System.out.println("Customer Menu:");
             System.out.println("1. Request a ride");
-            System.out.println("2. View ride status");
-            System.out.println("3. Disconnect");
+            System.out.println("2. Check ride status");
+            System.out.println("3. Accept ride offer");
+            System.out.println("4. Reject ride offer");
+            System.out.println("5. Disconnect");
             System.out.print("Choose an option: ");
             String choice = scanner.nextLine();
             out.println(choice);
-
+    
             if ("1".equals(choice)) {
+                out.println("request ride");
                 System.out.print("Enter pickup location: ");
-                out.println(scanner.nextLine());
+                String pickupLocation = scanner.nextLine();
+                out.println(pickupLocation);
                 System.out.print("Enter destination: ");
-                out.println(scanner.nextLine());
-                System.out.println(in.readLine());
+                String destination = scanner.nextLine();
+                out.println(destination);
+                System.out.println(in.readLine()); 
             } else if ("2".equals(choice)) {
-                System.out.println("Ride Status: " + in.readLine());
+                out.println("check ride status");
+                String response;
+                while (!(response = in.readLine()).isEmpty()) {
+                    System.out.println(response);
+                }
             } else if ("3".equals(choice)) {
+                System.out.print("Enter driver username to accept: ");
+                String driverUsername = scanner.nextLine();
+                out.println("accept offer");
+                out.println(driverUsername);
+                
+                System.out.print("Enter driver ID: ");
+                String driverId = scanner.nextLine();
+                out.println(driverId);
+                
+                System.out.print("Enter fare amount: ");
+                String fare = scanner.nextLine();
+                out.println(fare);
+                
+                System.out.println(in.readLine());
+            } else if ("4".equals(choice)) {
+                System.out.print("Enter driver username to reject: ");
+                String driverUsername = scanner.nextLine();
+                out.println("reject offer");
+                out.println(driverUsername);
+                System.out.println(in.readLine());
+            } else if ("5".equals(choice)) {
                 closeConnection();
                 break;
             } else {
@@ -124,20 +159,25 @@ public class ClientInterface {
     private void handleDriverMenu() throws IOException {
         while (true) {
             System.out.println("Driver Menu:");
-            System.out.println("1. Offer a fare");
-            System.out.println("2. Update ride status");
+            System.out.println("1. View ride requests");
+            System.out.println("2. Offer a fare");
             System.out.println("3. Disconnect");
             System.out.print("Choose an option: ");
             String choice = scanner.nextLine();
             out.println(choice);
 
             if ("1".equals(choice)) {
-                System.out.print("Enter fare amount: ");
-                out.println(scanner.nextLine());
-                System.out.println(in.readLine());
+                String response;
+                while (!(response = in.readLine()).isEmpty()) {
+                    System.out.println(response);
+                }
             } else if ("2".equals(choice)) {
-                System.out.print("Enter ride status (start/finish): ");
-                out.println(scanner.nextLine());
+                System.out.print("Enter customer username: ");
+                String customerId = scanner.nextLine();
+                out.println("offer ride " + customerId);
+                System.out.print("Enter fare amount: ");
+                String fare = scanner.nextLine();
+                out.println(fare);
                 System.out.println(in.readLine());
             } else if ("3".equals(choice)) {
                 closeConnection();
