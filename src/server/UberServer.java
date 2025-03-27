@@ -64,12 +64,12 @@ public class UberServer implements Runnable {
         return userTypes.get(username);
     }
 
-    public void requestRide(ClientHandler customer, String pickupLocation, String destination) {
-        System.out.println("Ride requested by customer: " + customer.getUsername());
+    public void requestRide(ClientHandler customer, String pickupLocation, String destination,String username) {
+        System.out.println("Ride requested by customer: " + username);
         RideRequest rideRequest = new RideRequest(customer, pickupLocation, destination);
         rideRequests.add(rideRequest);
         for (ClientHandler driver : drivers.values()) {
-            driver.sendMessage("New ride request from " + customer.getUsername() + 
+            driver.sendMessage("New ride request from " + username + 
                                " | Pickup: " + pickupLocation + 
                                " | Destination: " + destination);
         }
@@ -79,7 +79,7 @@ public class UberServer implements Runnable {
     public void handleRideOffer(ClientHandler driver, String customerId, int fare) {
         ClientHandler customer = null;
         for (ClientHandler c : customers.values()) {
-            if (c.getUsername().equals(customerId)) {
+            if (c.username.equals(customerId)) {
                 customer = c;
                 break;
             }
@@ -88,7 +88,7 @@ public class UberServer implements Runnable {
         if (customer != null) {
             RideRequest matchingRequest = findRideRequestForCustomer(customer);
             if (matchingRequest != null) {
-                customer.sendMessage("Driver " + driver.getUsername() + 
+                customer.sendMessage("Driver " + driver.username + 
                                      " offers ride for " + fare + 
                                      " | Pickup: " + matchingRequest.getPickupLocation() + 
                                      " | Destination: " + matchingRequest.getDestination());
@@ -112,20 +112,22 @@ public class UberServer implements Runnable {
     public void sendRideRequests(ClientHandler driver) {
         if (rideRequests.isEmpty()) {
             driver.sendMessage("No ride requests available");
+            driver.sendMessage("");
         } else {
             driver.sendMessage("Available Ride Requests:");
             for (RideRequest request : rideRequests) {
-                driver.sendMessage("Customer: " + request.getCustomer().getUsername() + 
+                driver.sendMessage("Customer: " + request.getCustomer().username + 
                                    " | Pickup: " + request.getPickupLocation() + 
                                    " | Destination: " + request.getDestination());
             }
+            driver.sendMessage("");
         }
     }
 
     public void rejectRideOffer(ClientHandler customer, int driverId) {
         ClientHandler driver = drivers.get(driverId);
         if (driver != null) {
-            driver.sendMessage("Ride offer rejected by customer " + customer.getUsername());
+            driver.sendMessage("Ride offer rejected by customer " + customer.username);
         } else {
             customer.sendMessage("Error: Driver not found");
         }
@@ -143,7 +145,7 @@ public class UberServer implements Runnable {
         if (completedRide != null) {
             ClientHandler customer = completedRide.getCustomer();
             if (customer != null) {
-                customer.sendMessage("Ride completed by driver " + driver.getUsername());
+                customer.sendMessage("Ride completed by driver " + driver.username);
             }
 
             activeRides.remove(completedRide);
@@ -177,7 +179,7 @@ public class UberServer implements Runnable {
     
     public ClientHandler getDriverByUsername(String username) {
         for (ClientHandler driver : drivers.values()) {
-            if (driver.getUsername().equals(username)) {
+            if (driver.username.equals(username)) {
                 return driver;
             }
         }
@@ -195,7 +197,7 @@ public class UberServer implements Runnable {
     public void redistributeRideRequest(RideRequest rideRequest) {
         for (ClientHandler driver : drivers.values()) {
             driver.sendMessage("Redistributed Ride Request from " + 
-                               rideRequest.getCustomer().getUsername() + 
+                               rideRequest.getCustomer().username + 
                                " | Pickup: " + rideRequest.getPickupLocation() + 
                                " | Destination: " + rideRequest.getDestination());
         }

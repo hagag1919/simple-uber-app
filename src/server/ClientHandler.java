@@ -9,7 +9,7 @@ public class ClientHandler implements Runnable {
     private int clientId;
     private BufferedReader in;
     private PrintWriter out;
-    private String username;
+    public  String username;
 
     public ClientHandler(Socket socket, UberServer server) throws IOException {
         this.socket = socket;
@@ -43,8 +43,9 @@ public class ClientHandler implements Runnable {
 
     private void handleRegistration() throws IOException {
         String type = in.readLine();
-        String username = in.readLine();
+        this.username = in.readLine();
         String password = in.readLine();
+
 
         System.out.println("Registration attempt: " + username + ", type: " + type);
 
@@ -96,7 +97,7 @@ public class ClientHandler implements Runnable {
                 if ("request ride".equalsIgnoreCase(request)) {
                     String pickupLocation = in.readLine();
                     String destination = in.readLine();
-                    server.requestRide(this, pickupLocation, destination);
+                    server.requestRide(this, pickupLocation, destination, username);
                 } else if ("disconnect".equalsIgnoreCase(request)) {
                     server.removeCustomer(this);
                     socket.close();
@@ -121,7 +122,7 @@ public class ClientHandler implements Runnable {
                         server.addActiveRide(newRide);
                         
                         sendMessage("Ride accepted with driver " + driverUsername);
-                        newRide.getDriver().sendMessage("Ride confirmed by customer " + getUsername());
+                        newRide.getDriver().sendMessage("Ride confirmed by customer " + username);
                     } else {
                         sendMessage("Error: No matching ride request found");
                     }
@@ -130,7 +131,7 @@ public class ClientHandler implements Runnable {
                     
                     ClientHandler driver = server.getDriverByUsername(driverUsername);
                     if (driver != null) {
-                        driver.sendMessage("Ride offer rejected by customer " + getUsername());
+                        driver.sendMessage("Ride offer rejected by customer " + username);
                         
                         RideRequest rideRequest = server.findRideRequestForCustomer(this);
                         if (rideRequest != null) {
@@ -143,7 +144,7 @@ public class ClientHandler implements Runnable {
                     Ride activeRide = server.findActiveRideForCustomer(this);
                     if (activeRide != null) {
                         sendMessage("Current Ride Status:");
-                        sendMessage("Driver: " + activeRide.getDriver().getUsername());
+                        sendMessage("Driver: " + activeRide.getDriver().username);
                         sendMessage("Pickup: " + activeRide.getPickupLocation());
                         sendMessage("Destination: " + activeRide.getDestination());
                         sendMessage("Fare: " + activeRide.getFare());
@@ -162,22 +163,30 @@ public class ClientHandler implements Runnable {
         try {
             while (true) {
                 String request = in.readLine();
-                if ("view ride requests".equalsIgnoreCase(request)) {
+                if ("1".equalsIgnoreCase(request)) {
                     server.sendRideRequests(this);
-                } else if (request.startsWith("offer ride")) {
-                    String[] parts = request.split(" ");
-                    if (parts.length == 3) {
-                        String customerId = parts[2];
-                        int fare = Integer.parseInt(in.readLine());
-                        server.handleRideOffer(this, customerId, fare);
-                    } else {
-                        sendMessage("Invalid offer ride request format");
-                    }
-                } else if ("disconnect".equalsIgnoreCase(request)) {
+                    // wait for the driver next action
+                    continue;
+                } else if ("2".equalsIgnoreCase(request)) {
+                    sendMessage("Enter customer username to offer ride");
+                    String customerUsername = in.readLine();
+                    sendMessage("Enter fare amount");
+                    int fare = Integer.parseInt(in.readLine());
+                    server.handleRideOffer(this, customerUsername, fare);
+                    // if (parts.length == 3) {
+                    //     String customerId = parts[2];
+                    //     int fare = Integer.parseInt(in.readLine());
+                    //     server.handleRideOffer(this, customerId, fare);
+                    // } else {
+                    //     sendMessage("Invalid offer ride request format");
+                    // }
+                    continue;
+                } else if ("3".equalsIgnoreCase(request)) {
                     socket.close();
                     break;
                 } else {
                     sendMessage("Unknown request");
+                    continue;
                 }
             }
         } catch (IOException e) {
@@ -203,6 +212,7 @@ public class ClientHandler implements Runnable {
 
     public void sendMessage(String message) {
         out.println(message);
+        out.flush();
     }
 
     public String getUsername() {
