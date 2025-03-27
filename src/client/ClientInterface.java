@@ -104,82 +104,134 @@ public class ClientInterface {
             System.out.println("Customer Menu:");
             System.out.println("1. Request a ride");
             System.out.println("2. Check ride status");
-            System.out.println("3. Accept ride offer");
-            System.out.println("4. Reject ride offer");
+            System.out.println("3. View/Respond to offers");
+            System.out.println("4. Rate driver");
             System.out.println("5. Disconnect");
             System.out.print("Choose an option: ");
             String choice = scanner.nextLine();
-            out.println(choice);
     
-            if ("1".equals(choice)) {
-                out.println("request ride");
-                System.out.print("Enter pickup location: ");
-                String pickupLocation = scanner.nextLine();
-                out.println(pickupLocation);
-                System.out.print("Enter destination: ");
-                String destination = scanner.nextLine();
-                out.println(destination);
-                System.out.println(in.readLine()); 
-            } else if ("2".equals(choice)) {
-                out.println("check ride status");
-                String response;
-                while (!(response = in.readLine()).isEmpty()) {
-                    System.out.println(response);
-                }
-            } else if ("3".equals(choice)) {
-                System.out.print("Enter driver username to accept: ");
-                String driverUsername = scanner.nextLine();
-                out.println("accept offer");
-                out.println(driverUsername);
-                
-                System.out.print("Enter fare amount: ");
-                String fare = scanner.nextLine();
-                out.println(fare);
-                
-                System.out.println(in.readLine());
-            } else if ("4".equals(choice)) {
-                System.out.print("Enter driver username to reject: ");
-                String driverUsername = scanner.nextLine();
-                out.println("reject offer");
-                out.println(driverUsername);
-                System.out.println(in.readLine());
-            } else if ("5".equals(choice)) {
-                closeConnection();
-                break;
-            } else {
-                System.out.println("Invalid option, try again.");
+            switch (choice) {
+                case "1":
+                    out.println("request ride");
+                    System.out.print("Enter pickup location: ");
+                    String pickupLocation = scanner.nextLine();
+                    out.println(pickupLocation);
+                    System.out.print("Enter destination: ");
+                    String destination = scanner.nextLine();
+                    out.println(destination);
+                    System.out.println(in.readLine());
+                    break;
+                case "2":
+                    out.println("check ride status");
+                    String response;
+                    if((response = in.readLine()) != null) {
+                        System.out.println(response);
+                    }
+                    break;
+                case "3":
+                    out.println("view offers");
+                    String offersResponse;
+                    if((offersResponse = in.readLine()) != null) {
+                        System.out.println(offersResponse);
+                    }
+                    System.out.println("1. Accept offer\n2. Reject offer");
+                    System.out.print("Choose an option: ");
+                    String offerChoice = scanner.nextLine();
+                    if ("1".equals(offerChoice)) {
+                        System.out.print("Enter driver username: ");
+                        String driverUsername = scanner.nextLine();
+                        out.println("accept offer");
+                        out.println(driverUsername);
+                        System.out.println(in.readLine());
+                    } else if ("2".equals(offerChoice)) {
+                        System.out.print("Enter driver username: ");
+                        String driverUsername = scanner.nextLine();
+                        out.println("reject offer");
+                        out.println(driverUsername);
+                        System.out.println(in.readLine());
+                    } else {
+                        System.out.println("Invalid option.");
+                    }
+                    break;
+                case "4":
+                    rateDriver();
+                    break;
+                case "5":
+                    out.println("disconnect");
+                    closeConnection();
+                    return;
+                default:
+                    System.out.println("Invalid option, try again.");
             }
         }
+    }
+
+    private void rateDriver() throws IOException {
+        out.println("rate driver");
+        System.out.print("Enter driver username: ");
+        String driverUsername = scanner.nextLine();
+        out.println(driverUsername);
+        System.out.print("Enter rating (1-5): ");
+        int rating = Integer.parseInt(scanner.nextLine());
+        out.println(rating);
+        System.out.print("Enter comments: ");
+        String comments = scanner.nextLine();
+        out.println(comments);
+        System.out.println(in.readLine());
     }
 
     private void handleDriverMenu() throws IOException {
         while (true) {
             System.out.println("Driver Menu:");
-            System.out.println("1. View ride requests");
+            System.out.println("1. Get ride requests");
             System.out.println("2. Offer a fare");
-            System.out.println("3. Disconnect");
+            System.out.println("3. View ride status");
+            System.out.println("4. Update ride status");
+            System.out.println("5. Disconnect");
             System.out.print("Choose an option: ");
             String choice = scanner.nextLine();
             out.println(choice);
+    
+            switch (choice) {
+                case "1":
+                    String requestsResponse;
+                    while (!(requestsResponse = in.readLine()).isEmpty()) {
+                        System.out.println(requestsResponse);
+                    }
+                    break;
+                case "2":
+                    System.out.print("Enter customer username: ");
+                    String customerUsername = scanner.nextLine();
+                    out.println(customerUsername);
+                    System.out.print("Enter fare amount: ");
+                    int fare = Integer.parseInt(scanner.nextLine());
+                    out.println(fare);
+                    System.out.println(in.readLine());
+                    break;
+                case "3":
+                    out.println("check ride status");
+                    String statusResponse;
+                    if((statusResponse = in.readLine()) != null) {
+                        System.out.println(statusResponse);
+                    }
 
-            if ("1".equals(choice)) {
-                String response;
-                while (!(response = in.readLine()).isEmpty()) {
-                    System.out.println(response);
-                }
-            } else if ("2".equals(choice)) {
-                System.out.print("Enter customer username: ");
-                String customerId = scanner.nextLine();
-                out.println("offer ride " + customerId);
-                System.out.print("Enter fare amount: ");
-                String fare = scanner.nextLine();
-                out.println(fare);
-                System.out.println(in.readLine());
-            } else if ("3".equals(choice)) {
-                closeConnection();
-                break;
-            } else {
-                System.out.println("Invalid option, try again.");
+                    break;
+                case "4":
+                    System.out.println("1. Start ride\n2. End ride");
+                    System.out.print("Choose an option: ");
+                    String rideChoice = scanner.nextLine();
+                    out.println(rideChoice);
+                    if ("1".equals(rideChoice) || "2".equals(rideChoice)) {
+                        System.out.println(in.readLine());
+                    } else {
+                        System.out.println("Invalid option.");
+                    }
+                    break;
+                case "5":
+                    closeConnection();
+                    return;
+                default:
+                    System.out.println("Invalid option, try again.");
             }
         }
     }

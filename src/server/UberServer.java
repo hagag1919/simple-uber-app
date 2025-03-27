@@ -1,5 +1,9 @@
 package server;
 
+import client.Offer;
+import client.Review;
+import client.RideStatus;
+
 import java.io.*;
 import java.net.*;
 import java.util.*;
@@ -12,8 +16,13 @@ public class UberServer implements Runnable {
     private Map<String, String> userCredentials = new HashMap<>();
     private Map<String, String> userTypes = new HashMap<>();
     private int clientIdCounter = 0;
-    private List<Ride> activeRides = new ArrayList<>();
+    private List<Ride> totalRide = new ArrayList<>();
     private List<RideRequest> rideRequests = new ArrayList<>();
+
+    private Map<String, List<Review>> driverReviews = new HashMap<>();
+
+
+    private List<Offer> offers = new ArrayList<>();
 
     public UberServer() throws IOException {
         serverSocket = new ServerSocket(port);
@@ -76,29 +85,29 @@ public class UberServer implements Runnable {
         customer.sendMessage("Ride requested. Waiting for driver offers.");
     }
 
-    public void handleRideOffer(ClientHandler driver, String customerId, int fare) {
-        ClientHandler customer = null;
-        for (ClientHandler c : customers.values()) {
-            if (c.username.equals(customerId)) {
-                customer = c;
-                break;
-            }
-        }
-
-        if (customer != null) {
-            RideRequest matchingRequest = findRideRequestForCustomer(customer);
-            if (matchingRequest != null) {
-                customer.sendMessage("Driver " + driver.username + 
-                                     " offers ride for " + fare + 
-                                     " | Pickup: " + matchingRequest.getPickupLocation() + 
-                                     " | Destination: " + matchingRequest.getDestination());
-            } else {
-                driver.sendMessage("Error: No matching ride request found");
-            }
-        } else {
-            driver.sendMessage("Error: Customer not found");
-        }
-    }
+//    public void handleRideOffer(ClientHandler driver, String customerId, int fare) {
+//        ClientHandler customer = null;
+//        for (ClientHandler c : customers.values()) {
+//            if (c.username.equals(customerId)) {
+//                customer = c;
+//                break;
+//            }
+//        }
+//
+//        if (customer != null) {
+//            RideRequest matchingRequest = findRideRequestForCustomer(customer);
+//            if (matchingRequest != null) {
+//                customer.sendMessage("Driver " + driver.username +
+//                                     " offers ride for " + fare +
+//                                     " | Pickup: " + matchingRequest.getPickupLocation() +
+//                                     " | Destination: " + matchingRequest.getDestination());
+//            } else {
+//                driver.sendMessage("Error: No matching ride request found");
+//            }
+//        } else {
+//            driver.sendMessage("Error: Customer not found");
+//        }
+//    }
 
     public RideRequest findRideRequestForCustomer(ClientHandler customer) {
         for (RideRequest request : rideRequests) {
@@ -124,41 +133,51 @@ public class UberServer implements Runnable {
         }
     }
 
-    public void rejectRideOffer(ClientHandler customer, int driverId) {
-        ClientHandler driver = drivers.get(driverId);
-        if (driver != null) {
-            driver.sendMessage("Ride offer rejected by customer " + customer.username);
+    public void rejectRideOffer(ClientHandler customer) {
+        RideRequest rideRequest = findRideRequestForCustomer(customer);
+        if (rideRequest == null) {
+            customer.sendMessage("Error: No matching ride request found");
         } else {
-            customer.sendMessage("Error: Driver not found");
+            rideRequests.remove(rideRequest);
+            redistributeRideRequest(rideRequest);
+            customer.sendMessage("Ride offer rejected");
         }
     }
 
     public void completeRide(ClientHandler driver) {
         Ride completedRide = null;
-        for (Ride ride : activeRides) {
-            if (ride.getDriver().equals(driver)) {
+        for (Ride ride : totalRide) {
+            if (ride.getDriver().equals(driver) && ride.getStatus() == RideStatus.IN_PROGRESS) {
                 completedRide = ride;
                 break;
             }
         }
 
-        if (completedRide != null) {
-            ClientHandler customer = completedRide.getCustomer();
-            if (customer != null) {
-                customer.sendMessage("Ride completed by driver " + driver.username);
-            }
-
-            activeRides.remove(completedRide);
-            completedRide.getDriver().inRide = false;
-            completedRide.getCustomer().inRide = false;
-            driver.sendMessage("Ride completed");
-        } else {
-            driver.sendMessage("No active ride found to complete");
+        if(completedRide == null) {
+            driver.sendMessage("Error: No active ride found");
+            return;
         }
+
+        completedRide.updateStatus(RideStatus.COMPLETED);
+        completedRide.getCustomer().sendMessage("Ride completed. Thank you for riding with us. Fare: ");
+        completedRide.getDriver().sendMessage("Ride completed. Fare: " + completedRide.getFare());
+    }
+
+    //startRide
+    public void startRide(ClientHandler driver, ClientHandler customerId) {
+        Ride ride = findActiveRideForCustomer(customerId);
+        if (ride == null) {
+            driver.sendMessage("Error: No active ride found");
+            return;
+        }
+        ride.updateStatus(RideStatus.IN_PROGRESS);
+        driver.sendMessage("Ride started");
+        customerId.sendMessage("Ride started");
+
     }
 
     public void getAdminStats(ClientHandler admin) {
-        admin.sendMessage("Total active rides: " + activeRides.size());
+        admin.sendMessage("Total active rides: " + totalRide.size());
         admin.sendMessage("Total customers: " + customers.size());
         admin.sendMessage("Total drivers: " + drivers.size());
     }
@@ -193,7 +212,7 @@ public class UberServer implements Runnable {
     }
     
     public void addActiveRide(Ride ride) {
-        activeRides.add(ride);
+        totalRide.add(ride);
         ride.getDriver().inRide = true;
         ride.getCustomer().inRide = true;
     }
@@ -208,11 +227,78 @@ public class UberServer implements Runnable {
     }
     
     public Ride findActiveRideForCustomer(ClientHandler customer) {
-        for (Ride ride : activeRides) {
+        for (Ride ride : totalRide) {
             if (ride.getCustomer().equals(customer)) {
                 return ride;
             }
         }
         return null;
+    }
+
+    public boolean addOffer(Offer offer) {
+        return offers.add(offer);
+    }
+
+    public List<Offer> getOffers() {
+        return offers;
+    }
+
+    public boolean isValidCustomer(String username) {
+        return customers.values().stream().anyMatch(c -> c.username.equals(username));
+    }
+
+    public RideStatus getRideStatus(ClientHandler driver)
+    {
+        for (Ride ride : totalRide) {
+            if (ride.getDriver().equals(driver)) {
+                return ride.getStatus();
+            }
+        }
+        return null;
+    }
+
+    Ride getCurrentRideByDriver(ClientHandler driver) {
+        for (Ride ride : totalRide) {
+            if (ride.getDriver().equals(driver) && ride.getStatus() == RideStatus.IN_PROGRESS){
+                return ride;
+            }
+        }
+        return null;
+    }
+    public ClientHandler getCustomerByUsername(String username) {
+        for (ClientHandler customer : customers.values()) {
+            if (customer.username.equals(username)) {
+                return customer;
+            }
+        }
+        return null;
+    }
+
+    public void addDriverReview(String driverUsername, Review review) {
+        driverReviews.computeIfAbsent(driverUsername, k -> new ArrayList<>()).add(review);
+    }
+
+    public double getDriverRating(String driverUsername) {
+        List<Review> reviews = driverReviews.get(driverUsername);
+        if (reviews == null || reviews.isEmpty()) {
+            return 0.0;
+        }
+        int totalRating = reviews.stream().mapToInt(Review::getRating).sum();
+        return (double) totalRating / reviews.size();
+    }
+
+    public void displayDriverRating(ClientHandler client, String driverUsername) {
+        double rating = getDriverRating(driverUsername);
+        client.sendMessage("Driver " + driverUsername + " has an overall rating of: " + rating);
+    }
+    //getOffersForCustomer
+    public List<Offer> getOffersForCustomer(ClientHandler customer) {
+        List<Offer> customerOffers = new ArrayList<>();
+        for (Offer offer : offers) {
+            if (offer.getCustomerUsername().equals(customer.username)) {
+                customerOffers.add(offer);
+            }
+        }
+        return customerOffers;
     }
 }

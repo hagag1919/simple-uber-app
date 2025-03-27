@@ -1,5 +1,7 @@
 package server;
 
+import client.RideStatus;
+
 public class Ride {
     private ClientHandler driver;
     private ClientHandler customer;
@@ -8,22 +10,14 @@ public class Ride {
     private int fare;
     private RideStatus status;
 
-    public enum RideStatus {
-        REQUESTED,
-        ACCEPTED,
-        IN_PROGRESS,
-        COMPLETED,
-        CANCELLED
-    }
-
     public Ride(ClientHandler driver, ClientHandler customer, 
-                String pickupLocation, String destination, int fare) {
+                String pickupLocation, String destination, int fare, RideStatus status) {
         this.driver = driver;
         this.customer = customer;
         this.pickupLocation = pickupLocation;
         this.destination = destination;
         this.fare = fare;
-        this.status = RideStatus.REQUESTED;
+        this.status = status;
     }
 
     public ClientHandler getDriver() { return driver; }
