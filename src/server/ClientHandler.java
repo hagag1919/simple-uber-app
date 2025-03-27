@@ -10,6 +10,7 @@ public class ClientHandler implements Runnable {
     private BufferedReader in;
     private PrintWriter out;
     public  String username;
+    public  boolean inRide = false;
 
     public ClientHandler(Socket socket, UberServer server) throws IOException {
         this.socket = socket;
@@ -99,12 +100,15 @@ public class ClientHandler implements Runnable {
                     String destination = in.readLine();
                     server.requestRide(this, pickupLocation, destination, username);
                 } else if ("disconnect".equalsIgnoreCase(request)) {
-                    server.removeCustomer(this);
-                    socket.close();
+                    if(inRide) {
+                        sendMessage("You are in a ride, you cannot disconnect");
+                    } else {
+                        server.removeCustomer(this);
+                        socket.close();
                     break;
+                    }
                 } else if ("accept offer".equalsIgnoreCase(request)) {
                     String driverUsername = in.readLine();
-                    int driverId = Integer.parseInt(in.readLine());
                     int fare = Integer.parseInt(in.readLine());
                     
                     RideRequest rideRequest = server.findRideRequestForCustomer(this);
@@ -150,6 +154,7 @@ public class ClientHandler implements Runnable {
                         sendMessage("Fare: " + activeRide.getFare());
                     } else {
                         sendMessage("No active ride found");
+                        sendMessage("");
                     }
                 }
             }
@@ -182,8 +187,12 @@ public class ClientHandler implements Runnable {
                     // }
                     continue;
                 } else if ("3".equalsIgnoreCase(request)) {
-                    socket.close();
-                    break;
+                    if(inRide) {
+                        sendMessage("You are in a ride, you cannot disconnect");
+                    } else {   
+                        socket.close();
+                        break;
+                    }
                 } else {
                     sendMessage("Unknown request");
                     continue;

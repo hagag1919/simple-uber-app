@@ -132,10 +132,6 @@ public class ClientInterface {
                 out.println("accept offer");
                 out.println(driverUsername);
                 
-                System.out.print("Enter driver ID: ");
-                String driverId = scanner.nextLine();
-                out.println(driverId);
-                
                 System.out.print("Enter fare amount: ");
                 String fare = scanner.nextLine();
                 out.println(fare);

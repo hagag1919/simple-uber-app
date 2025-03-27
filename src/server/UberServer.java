@@ -149,6 +149,8 @@ public class UberServer implements Runnable {
             }
 
             activeRides.remove(completedRide);
+            completedRide.getDriver().inRide = false;
+            completedRide.getCustomer().inRide = false;
             driver.sendMessage("Ride completed");
         } else {
             driver.sendMessage("No active ride found to complete");
@@ -192,6 +194,8 @@ public class UberServer implements Runnable {
     
     public void addActiveRide(Ride ride) {
         activeRides.add(ride);
+        ride.getDriver().inRide = true;
+        ride.getCustomer().inRide = true;
     }
     
     public void redistributeRideRequest(RideRequest rideRequest) {
