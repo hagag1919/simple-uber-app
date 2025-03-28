@@ -317,8 +317,11 @@ public class ClientHandler implements Runnable {
 
 
     private void handleRateDriver() throws IOException {
+        sendMessage("Enter driver username: ");
         String driverUsername = in.readLine();
+        sendMessage("Enter rating (1-5): ");
         int rating = Integer.parseInt(in.readLine());
+        sendMessage("Enter comments: ");
         String comments = in.readLine();
 
         Review review = new Review(username, rating, comments);
