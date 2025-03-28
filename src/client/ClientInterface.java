@@ -77,18 +77,25 @@ public class ClientInterface {
     }
 
     private void handleLogin() throws IOException {
+        if (socket.isClosed()) {
+            System.out.println("Reconnecting to the server...");
+            this.socket = new Socket("localhost", 12345);
+            this.in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            this.out = new PrintWriter(socket.getOutputStream(), true);
+        }
+    
         out.println("login");
         System.out.print("Enter username: ");
         String username = scanner.nextLine();
         System.out.print("Enter password: ");
         String password = scanner.nextLine();
-
+    
         out.println(username);
         out.println(password);
-
+    
         String response = in.readLine();
         System.out.println(response);
-
+    
         if ("Login successful".equals(response)) {
             String userType = in.readLine();
             if ("customer".equalsIgnoreCase(userType)) {
