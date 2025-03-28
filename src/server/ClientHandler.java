@@ -100,14 +100,14 @@ public class ClientHandler implements Runnable {
         try {
             while (true) {
                 String request = in.readLine();
-                if ("request ride".equalsIgnoreCase(request)) {
+                if ("1".equalsIgnoreCase(request)) {
                     String pickupLocation = in.readLine();
                     String destination = in.readLine();
                     server.requestRide(this, pickupLocation, destination, username);
 
                     sendMessage("Ride request sent");
                     
-                } else if ("disconnect".equalsIgnoreCase(request)) {
+                } else if ("5".equalsIgnoreCase(request)) {
                     if (inRide) {
                         sendMessage("You are in a ride, you cannot disconnect");
                     } else {
@@ -118,6 +118,8 @@ public class ClientHandler implements Runnable {
                 } else if ("accept offer".equalsIgnoreCase(request)) {
                     String driverUsername = in.readLine();
                     int fare = Integer.parseInt(in.readLine());
+
+                    
 
                     RideRequest rideRequest = server.findRideRequestForCustomer(this);
                     if (rideRequest != null) {
@@ -130,6 +132,9 @@ public class ClientHandler implements Runnable {
                                 RideStatus.IN_PROGRESS
                         );
 
+                        ClientHandler driver = server.getCustomerByUsername(driverUsername);
+                        this.inRide = true;
+                        driver.inRide = true;
                         server.removeRideRequest(rideRequest);
                         server.addActiveRide(newRide);
 
@@ -152,7 +157,7 @@ public class ClientHandler implements Runnable {
                     }
 
                     sendMessage("Ride offer rejected");
-                } else if ("check ride status".equalsIgnoreCase(request)) {
+                } else if ("2".equalsIgnoreCase(request)) {
                     Ride activeRide = server.findActiveRideForCustomer(this);
                     if (activeRide != null) {
                         sendMessage("Current Ride Status:");
@@ -168,9 +173,9 @@ public class ClientHandler implements Runnable {
                     server.startRide(this, server.getCustomerByUsername(username));
                 } else if ("complete ride".equalsIgnoreCase(request)) {
                     server.completeRide(this);
-                } else if ("rate driver".equalsIgnoreCase(request)) {
+                } else if ("4".equalsIgnoreCase(request)) {
                     handleRateDriver();
-                } else if ("view offers".equalsIgnoreCase(request)) {
+                } else if ("3".equalsIgnoreCase(request)) {
                     List<Offer> offers = server.getOffersForCustomer(this);
                     if (offers.isEmpty()) {
                         sendMessage("No offers available.");
@@ -229,9 +234,9 @@ public class ClientHandler implements Runnable {
                     // wait for the driver next action
                     continue;
                 } else if ("2".equalsIgnoreCase(request)) {
-                    sendMessage("Enter customer username to offer ride");
+                   // sendMessage("Enter customer username to offer ride");
                     String customerUsername = in.readLine();
-                    sendMessage("Enter fare amount");
+                    //sendMessage("Enter fare amount");
                     int fare = Integer.parseInt(in.readLine());
                     if(!server.isValidCustomer(customerUsername))
                     {

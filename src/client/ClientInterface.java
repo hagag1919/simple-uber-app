@@ -116,10 +116,11 @@ public class ClientInterface {
             System.out.println("5. Disconnect");
             System.out.print("Choose an option: ");
             String choice = scanner.nextLine();
+            out.println(choice);
     
             switch (choice) {
                 case "1":
-                    out.println("request ride");
+                    //out.println("request ride");
                     System.out.print("Enter pickup location: ");
                     String pickupLocation = scanner.nextLine();
                     out.println(pickupLocation);
@@ -129,14 +130,14 @@ public class ClientInterface {
                     System.out.println(in.readLine());
                     break;
                 case "2":
-                    out.println("check ride status");
+                   // out.println("check ride status");
                     String response;
                     if((response = in.readLine()) != null) {
                         System.out.println(response);
                     }
                     break;
                 case "3":
-                    out.println("view offers");
+                    //out.println("view offers");
                     String offersResponse;
                     if((offersResponse = in.readLine()) != null) {
                         System.out.println(offersResponse);
@@ -174,7 +175,7 @@ public class ClientInterface {
     }
 
     private void rateDriver() throws IOException {
-        out.println("rate driver");
+        out.println("4");
         System.out.print("Enter driver username: ");
         String driverUsername = scanner.nextLine();
         out.println(driverUsername);

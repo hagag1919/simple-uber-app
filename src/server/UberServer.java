@@ -77,11 +77,11 @@ public class UberServer implements Runnable {
         System.out.println("Ride requested by customer: " + username);
         RideRequest rideRequest = new RideRequest(customer, pickupLocation, destination);
         rideRequests.add(rideRequest);
-        for (ClientHandler driver : drivers.values()) {
-            driver.sendMessage("New ride request from " + username + 
-                               " | Pickup: " + pickupLocation + 
-                               " | Destination: " + destination);
-        }
+        // for (ClientHandler driver : drivers.values()) {
+        //     driver.sendMessage("New ride request from " + username + 
+        //                        " | Pickup: " + pickupLocation + 
+        //                        " | Destination: " + destination);
+        // }
         customer.sendMessage("Ride requested. Waiting for driver offers.");
     }
 
