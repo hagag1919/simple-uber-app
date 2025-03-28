@@ -68,6 +68,7 @@ public class AdminInterface {
         System.out.println(in.readLine());
         System.out.println(in.readLine());
         System.out.println(in.readLine());
+        System.out.println(in.readLine());
     }
 
     private void closeConnection() throws IOException {
