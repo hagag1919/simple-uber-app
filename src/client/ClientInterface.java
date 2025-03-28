@@ -133,9 +133,9 @@ public class ClientInterface {
                     System.out.println(in.readLine());
                     break;
                 case "2":
-                   // out.println("check ride status");
+                    out.println("2");
                     String response;
-                    if((response = in.readLine()) != null) {
+                    while((response = in.readLine()) != null && !response.isEmpty()) {
                         System.out.println(response);
                     }
                     break;
@@ -171,9 +171,10 @@ public class ClientInterface {
                     rateDriver();
                     break;
                 case "5":
-                    out.println("disconnect");
-                    closeConnection();
-                    return;
+                    // out.println("5");
+                    if(closeConnection())
+                        return;
+                    break;
                 default:
                     System.out.println("Invalid option, try again.");
             }
@@ -225,7 +226,7 @@ public class ClientInterface {
                 case "3":
                     out.println("check ride status");
                     String statusResponse;
-                    if((statusResponse = in.readLine()) != null) {
+                    while((statusResponse = in.readLine()) != null && !statusResponse.isEmpty()) {
                         System.out.println(statusResponse);
                     }
 
@@ -236,24 +237,36 @@ public class ClientInterface {
                     String rideChoice = scanner.nextLine();
                     out.println(rideChoice);
                     if ("1".equals(rideChoice) || "2".equals(rideChoice)) {
-                        System.out.println(in.readLine());
+                        String rideStatus;
+                        while ((rideStatus = in.readLine()) != null && !rideStatus.isEmpty()) {
+                            System.out.println(rideStatus);
+                        }
                     } else {
                         System.out.println("Invalid option.");
                     }
                     break;
                 case "5":
-                    closeConnection();
-                    return;
+
+                   if( closeConnection()){
+                        return;
+                   }
+                    break;
                 default:
                     System.out.println("Invalid option, try again.");
             }
         }
     }
 
-    private void closeConnection() throws IOException {
-        out.println("disconnect");
-        socket.close();
-        System.out.println("Disconnected from server.");
+    private boolean closeConnection() throws IOException {
+        out.println("5");
+        // wait for server to close connection
+        // wait for server to send message
+        String message;
+        while ((message = in.readLine()) != null && !message.isEmpty()) {
+            System.out.println(message);
+        }
+        // if(message.contains(""))
+        return socket.isClosed();
     }
 
     public static void main(String[] args) {

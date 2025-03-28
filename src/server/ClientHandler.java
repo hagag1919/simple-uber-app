@@ -114,8 +114,9 @@ public class ClientHandler implements Runnable {
                         handleRateDriver();
                         break;
                     case "5":
-                        handleCustomerDisconnect();
-                        return;
+                        if(handleCustomerDisconnect())
+                            return;
+                        break;
                     default:
                         sendMessage("Unknown request");
                 }
@@ -144,8 +145,10 @@ public class ClientHandler implements Runnable {
                         handleUpdateRideStatus();
                         break;
                     case "5":
-                        handleDriverDisconnect();
-                        return;
+
+                       if(handleDriverDisconnect())
+                            return;
+                        break;
                     default:
                         sendMessage("Unknown request");
                 }
@@ -170,6 +173,7 @@ public class ClientHandler implements Runnable {
             sendMessage("Pickup: " + activeRide.getPickupLocation());
             sendMessage("Destination: " + activeRide.getDestination());
             sendMessage("Fare: " + activeRide.getFare());
+            sendMessage("");
         } else {
             sendMessage("No active ride found");
             sendMessage("");
@@ -203,17 +207,17 @@ public class ClientHandler implements Runnable {
             sendMessage("Invalid driver username");
             return;
         }
+        ClientHandler driver = server.getDriverByUsername(driverUsername);
         RideRequest rideRequest = server.findRideRequestForCustomer(this);
         if (rideRequest != null) {
             Ride newRide = new Ride(
-                    server.getDriverByUsername(driverUsername),
+                    driver,
                     this,
                     rideRequest.getPickupLocation(),
                     rideRequest.getDestination(),
                     fare,
                     RideStatus.IN_PROGRESS
             );
-            ClientHandler driver = server.getCustomerByUsername(driverUsername);
             this.inRide = true;
             driver.inRide = true;
             server.removeRideRequest(rideRequest);
@@ -239,12 +243,17 @@ public class ClientHandler implements Runnable {
         sendMessage("Ride offer rejected");
     }
 
-    private void handleCustomerDisconnect() throws IOException {
+    private boolean handleCustomerDisconnect() throws IOException {
         if (inRide) {
             sendMessage("You are in a ride, you cannot disconnect");
+            sendMessage("");
+            return false;
         } else {
             server.removeCustomer(this);
             socket.close();
+            sendMessage("Disconnecting...");
+            sendMessage("");
+            return true;
         }
     }
 
@@ -269,8 +278,10 @@ public class ClientHandler implements Runnable {
             sendMessage("Pickup: " + ride.getPickupLocation());
             sendMessage("Destination: " + ride.getDestination());
             sendMessage("Fare: " + ride.getFare());
+            sendMessage("");
         } else {
             sendMessage("No active ride found");
+            sendMessage("");
         }
     }
 
@@ -282,6 +293,7 @@ public class ClientHandler implements Runnable {
             ClientHandler customer = server.getCustomerByUsername(customerId);
             server.startRide(this, customer);
             sendMessage("Ride started with customer " + customer.getUsername());
+            sendMessage("");
         } else if ("2".equalsIgnoreCase(rideChoice)) {
             out.println("end ride");
             server.completeRide(this);
@@ -291,11 +303,16 @@ public class ClientHandler implements Runnable {
         }
     }
 
-    private void handleDriverDisconnect() throws IOException {
+    private boolean handleDriverDisconnect() throws IOException {
         if (inRide) {
             sendMessage("You are in a ride, you cannot disconnect");
+            sendMessage("");
+            return false;
         } else {
             socket.close();
+            sendMessage("Disconnecting...");
+            sendMessage("");
+            return true;
         }
     }
 
