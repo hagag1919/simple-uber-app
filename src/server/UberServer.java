@@ -77,7 +77,7 @@ public class UberServer implements Runnable {
         System.out.println("Ride requested by customer: " + username);
         RideRequest rideRequest = new RideRequest(customer, pickupLocation, destination);
         rideRequests.add(rideRequest);
-        rideRequests.getLast().printData();
+        rideRequests.get(rideRequests.size()-1).printData();
     }
 
 //    public void handleRideOffer(ClientHandler driver, String customerId, int fare) {
