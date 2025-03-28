@@ -124,7 +124,6 @@ public class ClientInterface {
     
             switch (choice) {
                 case "1":
-                    //out.println("request ride");
                     System.out.print("Enter pickup location: ");
                     String pickupLocation = scanner.nextLine();
                     out.println(pickupLocation);
@@ -142,7 +141,7 @@ public class ClientInterface {
                     break;
                 case "3":
                     String offersResponse;
-                   if ((offersResponse = in.readLine()) != null) {
+                   if ((offersResponse = in.readLine()) != null && !offersResponse.isEmpty()) {
                         System.out.println(offersResponse);
                        System.out.println("1. Accept offer\n2. Reject offer");
                        System.out.print("Choose an option: ");

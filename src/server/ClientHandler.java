@@ -142,14 +142,15 @@ public class ClientHandler implements Runnable {
                         for (Offer offer : offers) {
                             sendMessage("Offer from driver " + offer.getDriverName() + " with fare: " + offer.getFare());
                         }
-                      //  sendMessage("1. Accept offer\n2. Reject offer");
                         String offerChoice = in.readLine();
                         if ("1".equals(offerChoice)) {
-                           // sendMessage("Enter driver username to accept offer: ");
                             String driverUsername = in.readLine();
-                            int fare = Integer.parseInt(in.readLine());
+                            int fare = server.getFareByDriverID(driverUsername, this.getUsername());
 
-
+                            if(fare == -1) {
+                                sendMessage("Invalid driver username");
+                                continue;
+                            }
 
                             RideRequest rideRequest = server.findRideRequestForCustomer(this);
                             if (rideRequest != null) {

@@ -54,4 +54,11 @@ class RideRequest {
     public String getDestination() {
         return destination;
     }
+
+    public  void printData()
+    {
+        System.out.println("Customer: "+customer.getUsername());
+        System.out.println("Pickup Location: "+pickupLocation);
+        System.out.println("Destination: "+destination);
+    }
 }

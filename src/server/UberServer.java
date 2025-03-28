@@ -77,12 +77,7 @@ public class UberServer implements Runnable {
         System.out.println("Ride requested by customer: " + username);
         RideRequest rideRequest = new RideRequest(customer, pickupLocation, destination);
         rideRequests.add(rideRequest);
-        // for (ClientHandler driver : drivers.values()) {
-        //     driver.sendMessage("New ride request from " + username + 
-        //                        " | Pickup: " + pickupLocation + 
-        //                        " | Destination: " + destination);
-        // }
-        customer.sendMessage("Ride requested. Waiting for driver offers.");
+        rideRequests.getLast().printData();
     }
 
 //    public void handleRideOffer(ClientHandler driver, String customerId, int fare) {
@@ -300,5 +295,15 @@ public class UberServer implements Runnable {
             }
         }
         return customerOffers;
+    }
+
+    public int getFareByDriverID(String driverUsername, String customerUsername)
+    {
+        for (Offer offer : offers) {
+            if (offer.getDriverName().equals(driverUsername) && offer.getCustomerUsername().equals(customerUsername)) {
+                return offer.getFare();
+            }
+        }
+        return -1;
     }
 }
