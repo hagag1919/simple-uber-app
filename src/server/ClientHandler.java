@@ -115,48 +115,6 @@ public class ClientHandler implements Runnable {
                         socket.close();
                         break;
                     }
-                } else if ("accept offer".equalsIgnoreCase(request)) {
-                    String driverUsername = in.readLine();
-                    int fare = Integer.parseInt(in.readLine());
-
-                    
-
-                    RideRequest rideRequest = server.findRideRequestForCustomer(this);
-                    if (rideRequest != null) {
-                        Ride newRide = new Ride(
-                                server.getDriverByUsername(driverUsername),
-                                this,
-                                rideRequest.getPickupLocation(),
-                                rideRequest.getDestination(),
-                                fare,
-                                RideStatus.IN_PROGRESS
-                        );
-
-                        ClientHandler driver = server.getCustomerByUsername(driverUsername);
-                        this.inRide = true;
-                        driver.inRide = true;
-                        server.removeRideRequest(rideRequest);
-                        server.addActiveRide(newRide);
-
-                        sendMessage("Ride accepted with driver " + driverUsername);
-                        newRide.getDriver().sendMessage("Ride confirmed by customer " + username);
-                    } else {
-                        sendMessage("Error: No matching ride request found");
-                    }
-                } else if ("reject offer".equalsIgnoreCase(request)) {
-                    String driverUsername = in.readLine();
-
-                    ClientHandler driver = server.getDriverByUsername(driverUsername);
-                    if (driver != null) {
-                        driver.sendMessage("Ride offer rejected by customer " + username);
-
-                        RideRequest rideRequest = server.findRideRequestForCustomer(this);
-                        if (rideRequest != null) {
-                            server.redistributeRideRequest(rideRequest);
-                        }
-                    }
-
-                    sendMessage("Ride offer rejected");
                 } else if ("2".equalsIgnoreCase(request)) {
                     Ride activeRide = server.findActiveRideForCustomer(this);
                     if (activeRide != null) {
@@ -179,24 +137,57 @@ public class ClientHandler implements Runnable {
                     List<Offer> offers = server.getOffersForCustomer(this);
                     if (offers.isEmpty()) {
                         sendMessage("No offers available.");
+                        sendMessage("");
                     } else {
                         for (Offer offer : offers) {
                             sendMessage("Offer from driver " + offer.getDriverName() + " with fare: " + offer.getFare());
                         }
-                        sendMessage("1. Accept offer\n2. Reject offer");
+                      //  sendMessage("1. Accept offer\n2. Reject offer");
                         String offerChoice = in.readLine();
                         if ("1".equals(offerChoice)) {
-                            sendMessage("Enter driver username to accept offer: ");
+                           // sendMessage("Enter driver username to accept offer: ");
                             String driverUsername = in.readLine();
-                            out.println("accept offer");
-                            out.println(driverUsername);
+                            int fare = Integer.parseInt(in.readLine());
+
+
+
+                            RideRequest rideRequest = server.findRideRequestForCustomer(this);
+                            if (rideRequest != null) {
+                                Ride newRide = new Ride(
+                                        server.getDriverByUsername(driverUsername),
+                                        this,
+                                        rideRequest.getPickupLocation(),
+                                        rideRequest.getDestination(),
+                                        fare,
+                                        RideStatus.IN_PROGRESS
+                                );
+
+                                ClientHandler driver = server.getCustomerByUsername(driverUsername);
+                                this.inRide = true;
+                                driver.inRide = true;
+                                server.removeRideRequest(rideRequest);
+                                server.addActiveRide(newRide);
+
+                                sendMessage("Ride accepted with driver " + driverUsername);
+                                newRide.getDriver().sendMessage("Ride confirmed by customer " + username);
+                            } else {
+                                sendMessage("Error: No matching ride request found");
+                            }
                             sendMessage(in.readLine());
                         } else if ("2".equals(offerChoice)) {
-                            sendMessage("Enter driver username to reject offer: ");
                             String driverUsername = in.readLine();
-                            out.println("reject offer");
-                            out.println(driverUsername);
-                            sendMessage(in.readLine());
+
+                            ClientHandler driver = server.getDriverByUsername(driverUsername);
+                            if (driver != null) {
+                                driver.sendMessage("Ride offer rejected by customer " + username);
+
+                                RideRequest rideRequest = server.findRideRequestForCustomer(this);
+                                if (rideRequest != null) {
+                                    server.redistributeRideRequest(rideRequest);
+                                }
+                            }
+
+                            sendMessage("Ride offer rejected");
                         } else {
                             sendMessage("Invalid option.");
                         }
@@ -270,7 +261,7 @@ public class ClientHandler implements Runnable {
                     String rideChoice = in.readLine();
                     if ("1".equalsIgnoreCase(rideChoice)) {
                         out.println("start ride");
-                        sendMessage("Enter customer ID to start ride");
+                       // sendMessage("Enter customer ID to start ride");
                         String customerId = in.readLine();
                         ClientHandler customer = server.getCustomerByUsername(customerId);
                         server.startRide(this, customer);
