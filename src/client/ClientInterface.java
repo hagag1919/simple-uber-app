@@ -46,6 +46,11 @@ public class ClientInterface {
     }
 
     private void handleRegistration() throws IOException {
+        if (socket.isClosed()) {
+            this.socket = new Socket("localhost", 12345);
+            this.in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            this.out = new PrintWriter(socket.getOutputStream(), true);
+        }
         out.println("register");
         System.out.print("Enter user type (customer/driver): ");
         String type = scanner.nextLine();
@@ -78,7 +83,6 @@ public class ClientInterface {
 
     private void handleLogin() throws IOException {
         if (socket.isClosed()) {
-            System.out.println("Reconnecting to the server...");
             this.socket = new Socket("localhost", 12345);
             this.in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             this.out = new PrintWriter(socket.getOutputStream(), true);
