@@ -282,6 +282,19 @@ public class UberServer implements Runnable {
         return (double) totalRating / reviews.size();
     }
 
+    public void getDriverReviews(ClientHandler driver)
+    {
+        List<Review> reviews = driverReviews.get(driver.username);
+        if (reviews == null || reviews.isEmpty()) {
+            driver.sendMessage("No reviews found for driver " + driver.username);
+            return;
+        }
+        driver.sendMessage("Reviews for driver " + driver.username + ":");
+        for (Review review : reviews) {
+            driver.sendMessage("Rating: " + review.getRating() + " | Comment: " + review.getComments());
+        }
+    }
+
     public void displayDriverRating(ClientHandler client, String driverUsername) {
         double rating = getDriverRating(driverUsername);
         client.sendMessage("Driver " + driverUsername + " has an overall rating of: " + rating);

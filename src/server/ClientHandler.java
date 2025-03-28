@@ -14,8 +14,8 @@ public class ClientHandler implements Runnable {
     private int clientId;
     private BufferedReader in;
     private PrintWriter out;
-    public  String username;
-    public  boolean inRide = false;
+    public String username;
+    public boolean inRide = false;
 
     public ClientHandler(Socket socket, UberServer server) throws IOException {
         this.socket = socket;
@@ -36,8 +36,7 @@ public class ClientHandler implements Runnable {
                     handleRegistration();
                 } else if ("login".equalsIgnoreCase(action)) {
                     handleLogin();
-                }
-                else if ("disconnect".equalsIgnoreCase(action)) {
+                } else if ("disconnect".equalsIgnoreCase(action)) {
                     socket.close();
                     break;
                 }
@@ -52,15 +51,14 @@ public class ClientHandler implements Runnable {
         this.username = in.readLine();
         String password = in.readLine();
 
-
         System.out.println("Registration attempt: " + username + ", type: " + type);
 
         if (server.registerUser(username, password, type)) {
             out.println("Registration successful");
-            if("customer".equalsIgnoreCase(type)) {
+            if ("customer".equalsIgnoreCase(type)) {
                 server.addCustomer(clientId, this);
                 handleCustomer();
-            } else if("driver".equalsIgnoreCase(type)) {
+            } else if ("driver".equalsIgnoreCase(type)) {
                 server.addDriver(clientId, this);
                 handleDriver();
             }
@@ -114,7 +112,7 @@ public class ClientHandler implements Runnable {
                         handleRateDriver();
                         break;
                     case "5":
-                        if(handleCustomerDisconnect())
+                        if (handleCustomerDisconnect())
                             return;
                         break;
                     default:
@@ -145,8 +143,11 @@ public class ClientHandler implements Runnable {
                         handleUpdateRideStatus();
                         break;
                     case "5":
+                        handleGetRivews();
+                        break;
+                    case "6":
 
-                       if(handleDriverDisconnect())
+                        if (handleDriverDisconnect())
                             return;
                         break;
                     default:
@@ -216,8 +217,7 @@ public class ClientHandler implements Runnable {
                     rideRequest.getPickupLocation(),
                     rideRequest.getDestination(),
                     fare,
-                    RideStatus.IN_PROGRESS
-            );
+                    RideStatus.IN_PROGRESS);
             this.inRide = true;
             driver.inRide = true;
             server.removeRideRequest(rideRequest);
@@ -332,7 +332,6 @@ public class ClientHandler implements Runnable {
         }
     }
 
-
     private void handleRateDriver() throws IOException {
         String driverUsername = in.readLine();
         int rating = Integer.parseInt(in.readLine());
@@ -343,6 +342,10 @@ public class ClientHandler implements Runnable {
         sendMessage("Thank you for rating the driver!");
 
         server.displayDriverRating(this, driverUsername);
+    }
+
+    private void handleGetRivews() throws IOException {
+        server.getDriverReviews(this);
     }
 
     public void sendMessage(String message) {

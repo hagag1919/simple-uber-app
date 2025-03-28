@@ -59,7 +59,7 @@ public class ClientInterface {
         System.out.print("Enter password: ");
         String password = scanner.nextLine();
 
-        if(!"customer".equalsIgnoreCase(type) && !"driver".equalsIgnoreCase(type)) {
+        if (!"customer".equalsIgnoreCase(type) && !"driver".equalsIgnoreCase(type)) {
             System.out.println("Invalid user type");
             return;
         }
@@ -69,11 +69,11 @@ public class ClientInterface {
         out.println(password);
 
         String response = in.readLine();
-        if("Registration successful".equals(response)) {
+        if ("Registration successful".equals(response)) {
             System.out.println("Registration successful");
-            if("customer".equalsIgnoreCase(type)) {
+            if ("customer".equalsIgnoreCase(type)) {
                 handleCustomerMenu();
-            } else if("driver".equalsIgnoreCase(type)) {
+            } else if ("driver".equalsIgnoreCase(type)) {
                 handleDriverMenu();
             }
         } else {
@@ -87,19 +87,19 @@ public class ClientInterface {
             this.in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             this.out = new PrintWriter(socket.getOutputStream(), true);
         }
-    
+
         out.println("login");
         System.out.print("Enter username: ");
         String username = scanner.nextLine();
         System.out.print("Enter password: ");
         String password = scanner.nextLine();
-    
+
         out.println(username);
         out.println(password);
-    
+
         String response = in.readLine();
         System.out.println(response);
-    
+
         if ("Login successful".equals(response)) {
             String userType = in.readLine();
             if ("customer".equalsIgnoreCase(userType)) {
@@ -121,7 +121,7 @@ public class ClientInterface {
             System.out.print("Choose an option: ");
             String choice = scanner.nextLine();
             out.println(choice);
-    
+
             switch (choice) {
                 case "1":
                     System.out.print("Enter pickup location: ");
@@ -135,36 +135,35 @@ public class ClientInterface {
                 case "2":
                     out.println("2");
                     String response;
-                    while((response = in.readLine()) != null && !response.isEmpty()) {
+                    while ((response = in.readLine()) != null && !response.isEmpty()) {
                         System.out.println(response);
                     }
                     break;
                 case "3":
                     String offersResponse;
-                   if ((offersResponse = in.readLine()) != null && !offersResponse.isEmpty()) {
+                    if ((offersResponse = in.readLine()) != null && !offersResponse.isEmpty()) {
                         System.out.println(offersResponse);
-                       System.out.println("1. Accept offer\n2. Reject offer");
-                       System.out.print("Choose an option: ");
-                       String offerChoice = scanner.nextLine();
-                       out.println(offerChoice);
-                       if ("1".equals(offerChoice)) {
-                           System.out.print("Enter driver username: ");
-                           String driverUsername = scanner.nextLine();
-                           out.println(driverUsername);
-                           System.out.println(in.readLine());
-                       } else if ("2".equals(offerChoice)) {
-                           System.out.print("Enter driver username: ");
-                           String driverUsername = scanner.nextLine();
-                           out.println(driverUsername);
-                           System.out.println(in.readLine());
-                       } else {
-                           System.out.println("Invalid option.");
-                       }
-                    }
-                   else {
-                       System.out.println("No offers available");
+                        System.out.println("1. Accept offer\n2. Reject offer");
+                        System.out.print("Choose an option: ");
+                        String offerChoice = scanner.nextLine();
+                        out.println(offerChoice);
+                        if ("1".equals(offerChoice)) {
+                            System.out.print("Enter driver username: ");
+                            String driverUsername = scanner.nextLine();
+                            out.println(driverUsername);
+                            System.out.println(in.readLine());
+                        } else if ("2".equals(offerChoice)) {
+                            System.out.print("Enter driver username: ");
+                            String driverUsername = scanner.nextLine();
+                            out.println(driverUsername);
+                            System.out.println(in.readLine());
+                        } else {
+                            System.out.println("Invalid option.");
+                        }
+                    } else {
+                        System.out.println("No offers available");
 
-                   }
+                    }
 
                     break;
                 case "4":
@@ -172,7 +171,7 @@ public class ClientInterface {
                     break;
                 case "5":
                     // out.println("5");
-                    if(closeConnection())
+                    if (closeConnection())
                         return;
                     break;
                 default:
@@ -202,11 +201,12 @@ public class ClientInterface {
             System.out.println("2. Offer a fare");
             System.out.println("3. View ride status");
             System.out.println("4. Update ride status");
-            System.out.println("5. Disconnect");
+            System.out.println("5. get account reviews");
+            System.out.println("6. Disconnect");
             System.out.print("Choose an option: ");
             String choice = scanner.nextLine();
             out.println(choice);
-    
+
             switch (choice) {
                 case "1":
                     String requestsResponse;
@@ -226,7 +226,7 @@ public class ClientInterface {
                 case "3":
                     out.println("check ride status");
                     String statusResponse;
-                    while((statusResponse = in.readLine()) != null && !statusResponse.isEmpty()) {
+                    while ((statusResponse = in.readLine()) != null && !statusResponse.isEmpty()) {
                         System.out.println(statusResponse);
                     }
 
@@ -246,10 +246,17 @@ public class ClientInterface {
                     }
                     break;
                 case "5":
+                    out.println("5");
+                    String reviewsResponse;
+                    while ((reviewsResponse = in.readLine()) != null && !reviewsResponse.isEmpty()) {
+                        System.out.println(reviewsResponse);
+                    }
+                    break;
+                case "6":
 
-                   if( closeConnection()){
+                    if (closeConnection()) {
                         return;
-                   }
+                    }
                     break;
                 default:
                     System.out.println("Invalid option, try again.");
