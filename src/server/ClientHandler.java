@@ -146,7 +146,6 @@ public class ClientHandler implements Runnable {
                         handleGetRivews();
                         break;
                     case "6":
-
                         if (handleDriverDisconnect())
                             return;
                         break;
@@ -288,7 +287,7 @@ public class ClientHandler implements Runnable {
     private void handleUpdateRideStatus() throws IOException {
         String rideChoice = in.readLine();
         if ("1".equalsIgnoreCase(rideChoice)) {
-            out.println("start ride");
+            // out.println("start ride");
             String customerId = in.readLine();
             ClientHandler customer = server.getCustomerByUsername(customerId);
             server.startRide(this, customer);
@@ -298,8 +297,10 @@ public class ClientHandler implements Runnable {
             out.println("end ride");
             server.completeRide(this);
             sendMessage("Ride completed");
+            sendMessage("");
         } else {
             sendMessage("Invalid option, try again.");
+            sendMessage("");
         }
     }
 
@@ -340,6 +341,7 @@ public class ClientHandler implements Runnable {
         Review review = new Review(username, rating, comments);
         server.addDriverReview(driverUsername, review);
         sendMessage("Thank you for rating the driver!");
+        sendMessage("");
 
         server.displayDriverRating(this, driverUsername);
     }

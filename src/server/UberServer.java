@@ -166,9 +166,8 @@ public class UberServer implements Runnable {
             return;
         }
         ride.updateStatus(RideStatus.IN_PROGRESS);
-        driver.sendMessage("Ride started");
-        customerId.sendMessage("Ride started");
-
+        // driver.sendMessage("Ride started");
+        // customerId.sendMessage("Ride started");
     }
 
     public void getAdminStats(ClientHandler admin) {
@@ -287,19 +286,21 @@ public class UberServer implements Runnable {
         List<Review> reviews = driverReviews.get(driver.username);
         if (reviews == null || reviews.isEmpty()) {
             driver.sendMessage("No reviews found for driver " + driver.username);
+            driver.sendMessage("");
             return;
         }
         driver.sendMessage("Reviews for driver " + driver.username + ":");
         for (Review review : reviews) {
             driver.sendMessage("Rating: " + review.getRating() + " | Comment: " + review.getComments());
         }
+        driver.sendMessage("");
     }
 
     public void displayDriverRating(ClientHandler client, String driverUsername) {
         double rating = getDriverRating(driverUsername);
         client.sendMessage("Driver " + driverUsername + " has an overall rating of: " + rating);
     }
-    //getOffersForCustomer
+
     public List<Offer> getOffersForCustomer(ClientHandler customer) {
         List<Offer> customerOffers = new ArrayList<>();
         for (Offer offer : offers) {

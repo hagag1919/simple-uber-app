@@ -34,7 +34,7 @@ public class ClientInterface {
                         handleLogin();
                         break;
                     case "3":
-                        closeConnection();
+                        exit();
                         return;
                     default:
                         System.out.println("Invalid option, try again.");
@@ -171,7 +171,7 @@ public class ClientInterface {
                     break;
                 case "5":
                     // out.println("5");
-                    if (closeConnection())
+                    if (closeConnection(5))
                         return;
                     break;
                 default:
@@ -181,7 +181,7 @@ public class ClientInterface {
     }
 
     private void rateDriver() throws IOException {
-        out.println("4");
+        // out.println("4");
         System.out.print("Enter driver username: ");
         String driverUsername = scanner.nextLine();
         out.println(driverUsername);
@@ -191,7 +191,10 @@ public class ClientInterface {
         System.out.print("Enter comments: ");
         String comments = scanner.nextLine();
         out.println(comments);
-        System.out.println(in.readLine());
+        String response;
+        while((response = in.readLine()) != null && !response.isEmpty()) {
+            System.out.println(response);
+        }
     }
 
     private void handleDriverMenu() throws IOException {
@@ -237,6 +240,11 @@ public class ClientInterface {
                     String rideChoice = scanner.nextLine();
                     out.println(rideChoice);
                     if ("1".equals(rideChoice) || "2".equals(rideChoice)) {
+                        if("1".equals(rideChoice)) {
+                            System.out.println("Enter Username of customer");
+                            String customerUsername1 = scanner.nextLine();
+                            out.println(customerUsername1);
+                        }
                         String rideStatus;
                         while ((rideStatus = in.readLine()) != null && !rideStatus.isEmpty()) {
                             System.out.println(rideStatus);
@@ -246,15 +254,14 @@ public class ClientInterface {
                     }
                     break;
                 case "5":
-                    out.println("5");
+                    // out.println("5");
                     String reviewsResponse;
                     while ((reviewsResponse = in.readLine()) != null && !reviewsResponse.isEmpty()) {
                         System.out.println(reviewsResponse);
                     }
                     break;
                 case "6":
-
-                    if (closeConnection()) {
+                    if (closeConnection(6)) {
                         return;
                     }
                     break;
@@ -264,8 +271,8 @@ public class ClientInterface {
         }
     }
 
-    private boolean closeConnection() throws IOException {
-        out.println("5");
+    private boolean closeConnection(int option) throws IOException {
+        out.println(option);
         // wait for server to close connection
         // wait for server to send message
         String message;
@@ -274,6 +281,16 @@ public class ClientInterface {
         }
         // if(message.contains(""))
         return socket.isClosed();
+    }
+
+    private void exit() {
+        try {
+            out.println("disconnect");
+            socket.close();
+            System.out.println("Disconnected from server.");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public static void main(String[] args) {
