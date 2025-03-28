@@ -224,7 +224,7 @@ public class ClientInterface {
                     System.out.println(in.readLine());
                     break;
                 case "3":
-                    //out.println("check ride status");
+                    out.println("check ride status");
                     String statusResponse;
                     if((statusResponse = in.readLine()) != null) {
                         System.out.println(statusResponse);
